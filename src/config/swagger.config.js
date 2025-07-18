@@ -1,19 +1,19 @@
-const { url } = require('inspector');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi=require("swagger-ui-express");
 
 const swaggerSep=swaggerJsdoc({
   definition:{
+    openapi:'3.0.0',
     info:{
-      title:"divar backend",
-      description:"divar backend Apis",
+      title:"p2p backend",
+      description:"p2p store backend Apis",
       version:'1.0.0'
     }
   },
   servers:[{
     url:'http://localhost:3000/'
   }],
-  apis:[]
+  apis:[process.cwd()+'/src/modules/**/*.swagger.js']
 })
 
 const setupSwagger=(app)=>{
