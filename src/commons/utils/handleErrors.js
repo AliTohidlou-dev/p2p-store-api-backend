@@ -2,7 +2,7 @@ export function internalError(error, req, res, next) {
   return res.status(error.status || 500).json({
     status: error.status || 500,
     error: {
-      type: "Internal Error",
+      type: error.type || "Internal Error",
       message: error.message || "Internal Server Error",
     },
   });

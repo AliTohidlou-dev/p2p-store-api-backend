@@ -1,57 +1,94 @@
 const sanitize = require("sanitize-html");
 const Users = require("../users/user.model");
 const { authMessage } = require("./auth.message");
-const {randomInt}=require('crypto')
+const { randomInt } = require("crypto");
+const { type } = require("os");
 class AuthServices {
   #UsersModel;
   constructor() {
     this.#UsersModel = Users;
   }
   async sendOTP(mobile) {
-      const sanitizeMobileInput = sanitize(mobile, {
-        allowedAttributes: [],
-        allowedTags: [],
-      });
-      const user = await this.#UsersModel.findOne({
-      mobile:sanitizeMobileInput,
+    const user = await this.#UsersModel.findOne({
+      mobile
     });
-    if(!user){
-      const newUser=this.#UsersModel({
-        mobile:sanitizeMobileInput,
-        OTP:{
-          OTPCode: randomInt(10000,99999),
-          expiresIn: new Date(Date.now()+1000*60*2)
-        }
-      })
-      await newUser.save()
+    if (!user) {
+      const newUser = this.#UsersModel({
+        mobile,
+        OTP: {
+          OTPCode: randomInt(10000, 99999),
+          expiresIn: new Date(Date.now() + 1000 * 60 * 2),
+        },
+      });
+      await newUser.save();
       return {
-        status:200,
-        message:authMessage.sendOTP
-      }
+        status: 200,
+        message: authMessage.sendOTP,
+      };
     }
-    if(user && user.OTP.OTPCode && user.OTP.expiresIn>new Date(Date.now())){
-      return({
-        status:400,
-        message: authMessage.otpexist
-      })
+    if (
+      user.OTP &&
+      user.OTP.OTPCode &&
+      user.OTP.expiresIn > new Date(Date.now())
+    ) {
+      return {
+        status: 400,
+        message: authMessage.otpexist,
+      };
     }
-    user.OTP.OTPCode=randomInt(10000,99999);
-    user.OTP.expiresIn=new Date(Date.now()+1000*60*2);
+    user.OTP.OTPCode = randomInt(10000, 99999);
+    user.OTP.expiresIn = new Date(Date.now() + 1000 * 60 * 2);
     await user.save();
-    return({
-      status:200,
-      message:authMessage.sendOTP
-    })
+    return {
+      status: 200,
+      message: authMessage.sendOTP,
+    };
   }
-  async checkOTP(mobile, code) {}
+  async checkOTP(mobile, code) {
+    const now = new Date(Date.now());
+    await this.checkUserByMobile(mobile);
+    const user = await this.#UsersModel.findOne({
+      mobile
+    });
+    if (!user.OTP || !user.OTP.OTPCode) {
+      throw {
+        status: 404,
+        type: authMessage.typeNotFound,
+        message: authMessage.otpNotFound,
+      };
+    }
+    if (user.OTP.expiresIn < now) {
+      throw {
+        status: 400,
+        type:authMessage.typeInvalidData,
+        message: authMessage.otpexpired,
+      };
+    }
+    if (user.OTP.OTPCode !== code) {
+      throw {
+        status: 400,
+        type:authMessage.typeInvalidData,
+        message: authMessage.otpCodeIncorrect,
+      };
+    }
+    if (user.verifiedMobile===false) user.verifiedMobile = true;
+    await user.save();
+    return {
+      status: 200,
+      message: authMessage.login,
+      user
+    };
+
+  }
   async checkUserByMobile(mobile) {
     const user = await this.#UsersModel.findOne({
       mobile,
     });
     if (!user) {
       throw {
-        status:404,
-        message:authMessage.userNotFound
+        status: 404,
+        type:authMessage.typeNotFound,
+        message: authMessage.userNotFound,
       };
     }
     return user;

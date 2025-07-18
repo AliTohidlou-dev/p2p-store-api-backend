@@ -34,7 +34,7 @@ const userSchema=new mongoose.Schema({
   OTP:{
     type:OTPSchema,
   },
-  verfiedMobile:{
+  verifiedMobile:{
     type:Boolean,
     default:false,
   }

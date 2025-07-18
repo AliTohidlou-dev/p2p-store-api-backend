@@ -1,23 +1,31 @@
-const authServices=require('./auth.service');
+const authServices = require("./auth.service");
 class AuthControllers {
-  #authServices
+  #authServices;
   constructor() {
-    this.#authServices=authServices;
+    this.#authServices = authServices;
   }
-  async sendOTP(req,res,next){
+  async sendOTP(req, res, next) {
     try {
-      const result=await this.#authServices.sendOTP(req.body.mobile);
+      const result = await this.#authServices.sendOTP(req.body.mobile);
       res.status(result.status).json({
-        status:result.status,
-        message :result.message
-      })
+        status: result.status,
+        message: result.message,
+      });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
-  checkOTP(){
-
+  async checkOTP(req, res, next) {
+    try {
+      const { mobile, code } = req.body;
+      const result = await this.#authServices.checkOTP(mobile, code);
+      res.status(result.status).json({
+        result
+      })
+    } catch (error) {
+      next(error);
+    }
   }
 }
 
-module.exports= new AuthControllers();
+module.exports = new AuthControllers();

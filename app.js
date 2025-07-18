@@ -1,5 +1,5 @@
 const express = require('express');
-const {notFoundError,internalError}=require('./src/commons/handleErrors');
+const {notFoundError,internalError}=require('./src/commons/utils/handleErrors');
 const mongoose = require('mongoose');
 const allRouters = require('./src/index.routes');
 const setupSwagger = require('./src/config/swagger.config');

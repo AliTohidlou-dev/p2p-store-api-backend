@@ -5,8 +5,8 @@ const swaggerSep=swaggerJsdoc({
   definition:{
     openapi:'3.0.0',
     info:{
-      title:"p2p backend",
-      description:"p2p store backend Apis",
+      title:"divar backend",
+      description:"divar backend Apis",
       version:'1.0.0'
     }
   },
