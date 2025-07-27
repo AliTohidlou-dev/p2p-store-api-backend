@@ -1,4 +1,5 @@
 const authServices = require("./auth.service");
+const jwt =require('jsonwebtoken');
 class AuthControllers {
   #authServices;
   constructor() {
@@ -19,6 +20,14 @@ class AuthControllers {
     try {
       const { mobile, code } = req.body;
       const result = await this.#authServices.checkOTP(mobile, code);
+      const token=jwt.sign({mobile, userId:result.user._id},process.env.JWT_SECRET,{expiresIn:'1h'})
+      res.cookie('access_token',token,{
+        httpOnly:true,
+        secure:false,
+        signed:true,
+        sameSite: 'none',
+        maxAge: 60 * 60 * 100
+      })
       res.status(result.status).json({
         result
       })

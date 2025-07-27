@@ -2,7 +2,6 @@ const sanitize = require("sanitize-html");
 const Users = require("../users/user.model");
 const { authMessage } = require("./auth.message");
 const { randomInt } = require("crypto");
-const { type } = require("os");
 class AuthServices {
   #UsersModel;
   constructor() {
@@ -33,7 +32,7 @@ class AuthServices {
     ) {
       return {
         status: 400,
-        message: authMessage.otpexist,
+        message: authMessage.otp_exist,
       };
     }
     user.OTP.OTPCode = randomInt(10000, 99999);
@@ -61,7 +60,7 @@ class AuthServices {
       throw {
         status: 400,
         type:authMessage.typeInvalidData,
-        message: authMessage.otpexpired,
+        message: authMessage.otp_expired,
       };
     }
     if (user.OTP.OTPCode !== code) {
