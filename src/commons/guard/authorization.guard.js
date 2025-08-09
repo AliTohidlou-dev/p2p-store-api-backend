@@ -8,15 +8,19 @@ const Authorization = async (req, res, next) => {
       return res.status(401).json({ message: authorizationMessage.login });
     }
     const data = jwt.verify(token, process.env.JWT_SECRET);
+    if(!data?.id){
+      return res.status(401).json({ message: authorizationMessage.loginAgain });
+    }
     const user = await Users.findById(data.id, { verifiedMobile: 0, OTP: 0 });
     if (!user) {
       return res
         .status(401)
-        .json({ message: authorizationMessage.unauthorized });
+        .json({ message: authorizationMessage.notfound });
     }
+    req.user=user;
     next();
   } catch (error) {
-    return res.status(401).json({ message: authorizationMessage.loginAgain });
+    return res.status(401).json({ message: authorizationMessage.unauthorized });
   }
 };
 module.exports = Authorization;
